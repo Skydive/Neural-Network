@@ -2,6 +2,8 @@
 
 Network::Network()
 {
+	ghandle = nullptr;
+	gen = nullptr;
 	mt = std::mt19937();
 }
 
@@ -13,17 +15,20 @@ void Network::AddLayer(int size, std::function<void(Layer&, double&, double&)> A
 	NewLayer.ParentNetwork = this;
 
 	NewLayer.Outputs.resize(size);
+	NewLayer.WeighedInputs.resize(size);
+	NewLayer.Biases.resize(size);
 	if(Layers.size() >= 2)
 	{
 		Layer& PrevLayer = Layers[Layers.size()-2];
-		NewLayer.WeighedInputs.resize(size);
-		NewLayer.Biases.resize(size);
 		NewLayer.Weights.resize(size, PrevLayer.Outputs.size());
-		for(int j=0; j<NewLayer.Biases.size(); j++)
+		if(ActionNeuron != nullptr)
 		{
-			for(int k=0; k<PrevLayer.Outputs.size(); k++)
+			for(int j=0; j<NewLayer.Biases.size(); j++)
 			{
-				ActionNeuron(NewLayer, NewLayer.Biases(j), NewLayer.Weights(j, k));
+				for(int k=0; k<PrevLayer.Outputs.size(); k++)
+				{
+					ActionNeuron(NewLayer, NewLayer.Biases(j), NewLayer.Weights(j, k));
+				}
 			}
 		}
 	}
@@ -53,11 +58,18 @@ const VectorXd& Network::GetOutput()
 	return OutputLayer.Outputs;
 }
 
-void Network::PrintOutput()
+void Network::PrintOutput(bool bFancy)
 {
-	Layer& OutputLayer = Layers[Layers.size()-1];
-	for(int i=0; i<OutputLayer.Outputs.size(); i++)
+	VectorXd SanitizedOutputs = GetOutput().unaryExpr(SANITIZE_OUTPUT);
+	if(bFancy)
 	{
-		std::cout << "[" << i << "] -> " << OutputLayer.Outputs(i) << std::endl;
+		for(int i=0; i<SanitizedOutputs.size(); i++)
+		{
+			std::cout << "[" << i << "] -> " << SanitizedOutputs(i) << std::endl;
+		}
+	}
+	else
+	{
+		std::cout << SanitizedOutputs.transpose() << std::endl;
 	}
 }

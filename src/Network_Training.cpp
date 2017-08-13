@@ -1,14 +1,26 @@
 #include "Network.hpp"
 
+
+double Network::Cost()
+{
+	double Sum = 0.0;
+	for(const TrainingData& t : *T)
+	{
+		SetInput(t.Inputs, nullptr); FeedForward();
+		Sum += 0.5*((t.DesiredOutputs-GetOutput()).squaredNorm());
+	}
+	return Sum/T->size();
+}
+
 // Stochastic gradient descent
-void Network::SGD(std::vector<TrainingData>& trainingdata, int epochs, int size, double eta)
+void Network::SGD(int epochs, int size, double eta)
 {
 	for(int E=0; E<epochs; E++)
 	{
 		std::vector<TrainingData*> pointdata;
-		for(int i=0; i<trainingdata.size(); i++)
+		for(int i=0; i<T->size(); i++)
 		{
-			pointdata.push_back(&trainingdata[i]);
+			pointdata.push_back(&T->at(i));
 		}
 		std::random_shuffle(pointdata.begin(), pointdata.end());
 		for(int i=0; i<pointdata.size(); i += size)
@@ -49,7 +61,6 @@ void Network::UpdateMiniBatch(const std::vector<TrainingData*>& minibatch, doubl
 		VectorXd CostDerivative = OutputLayer.Outputs - minibatch[i]->DesiredOutputs;
 		OutputLayer.Error = CostDerivative.cwiseProduct(OutputLayer.WeighedInputs.unaryExpr(DERIVATIVE_SIGMOID));
 		OutputLayer.d_nabla_b += OutputLayer.Error;
-		MatrixXd A = OutputLayer.Error * Layers[Layers.size()-2].Outputs.transpose();
 		OutputLayer.d_nabla_w += OutputLayer.Error * Layers[Layers.size()-2].Outputs.transpose();
 		// Backpropagate the error
 		for(int i=Layers.size()-2; i>=1; i--)

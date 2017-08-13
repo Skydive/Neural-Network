@@ -1,4 +1,4 @@
-#pragma implement Network Network_Serialize Network_Training
+#pragma implement Network Network_Serialize Network_Training Network_Generator
 #pragma once
 
 #include <cmath>
@@ -25,6 +25,10 @@ const auto DERIVATIVE_SIGMOID = [&](double z) {
 	return ACTIVATOR_SIGMOID(z)*(1-ACTIVATOR_SIGMOID(z));
 };
 
+const auto SANITIZE_OUTPUT = [](double x)
+{
+	return (double)std::round(x);
+};
 
 struct TrainingData
 {
@@ -53,25 +57,42 @@ struct Network
 {
 	std::mt19937 mt;
 	std::vector<Layer> Layers;
+
+	// Generator
+	void* ghandle;
+	void* gen;
+
+	// Training
+	std::vector<TrainingData>* T;
+
 	Network();
+	~Network()
+	{
+		CloseGenerator();
+	}
 
 	void AddLayer(int size, std::function<void(Layer&, double&, double&)> ActionNeuron);
 	void SetInput(const VectorXd& v, std::function<double(double)> PrepareFunc);
 	void FeedForward();
 	const VectorXd& GetOutput();
-	void PrintOutput();
+	void PrintOutput(bool bFancy=false);
 	// Training
-	void SGD(std::vector<TrainingData>& trainingdata, int epochs, int size, double eta);
+	double Cost();
+	void SGD(int epochs, int size, double eta);
 	void UpdateMiniBatch(const std::vector<TrainingData*>& minibatch, double eta);
 	// Serialize
 	void Serialize(std::string& out);
+	void Deserialize(const std::string& in);
+	// Generator
+	void GenerateTrainingData(const std::string& lib);
+	void CloseGenerator();
 };
 
 
 const auto NEURON_GAUSSIAN = [&](Layer& L, double& Bias, double& Weight){
 	auto& mt = L.ParentNetwork->mt;
 	std::normal_distribution<double> N(0.0, 1.0);
-	std::normal_distribution<double> B(0.0, 1/L.Outputs.size());
+	std::normal_distribution<double> B(0.0, 1.0 / (double)L.Outputs.size());
 	Bias = B(mt);
 	Weight = N(mt);
 };
