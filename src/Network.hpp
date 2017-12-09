@@ -1,4 +1,3 @@
-#pragma implement Network Network_Serialize Network_Training Network_Generator
 #pragma once
 
 #include <cmath>
@@ -27,7 +26,7 @@ const auto DERIVATIVE_SIGMOID = [&](double z) {
 
 const auto SANITIZE_OUTPUT = [](double x)
 {
-	return (double)std::round(x);
+	return std::round(x);
 };
 
 struct TrainingData

@@ -14,10 +14,10 @@ extern "C" void destroy_object(Generator* object)
 	delete object;
 }
 
-std::vector<TrainingData> Generator::GenerateTrainingData()
+std::vector<TrainingData>* Generator::GenerateTrainingData()
 {
-	std::vector<TrainingData> T;
-	std::cout << "\tGenerator_8BXOR.so executed.." << std::endl;
+	T.clear();
+	std::cout << "\tGenerator_8BAND.so executed.." << std::endl;
 	int limit = pow(2, 16);
 	for(int i=0; i<limit; i++)
 	{
@@ -34,5 +34,5 @@ std::vector<TrainingData> Generator::GenerateTrainingData()
 			t.DesiredOutputs(k) = ((int)(out[k]) == (int)("1")[0]) ? 1.0 : 0.0;
 		T.push_back(t);
 	}
-	return T;
+	return &T;
 }
