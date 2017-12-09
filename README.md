@@ -9,9 +9,10 @@ Works reasonably well on the MNIST test/training data, though a convolutional ne
 would be necessary for more accurate number detection on foreign data.
 
 # Usage
-> make
-> make gen
-
+```
+make
+make gen
+```
 # Dependencies:
 - [eigen3](http://eigen.tuxfamily.org/)
 - [mnist-loader](https://github.com/wichtounet/mnist)
