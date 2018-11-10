@@ -11,7 +11,7 @@ fi
 in1=$(echo $in1 | sed -e 's/\(.\)/\1 /g')
 in2=$(echo $in2 | sed -e 's/\(.\)/\1 /g')
 in="$in1 $in2"
-cmd="../main -read \"8B-$1.zlib\" -feedforward \"$in\" -output | tail -n1"
+cmd="../bin/main -read \"../programs/8B-$1.zlib\" -feedforward \"$in\" -output | tail -n1"
 output=$(eval $cmd)
 output=$(echo $output | sed -e 's/ //g')
 echo $output
